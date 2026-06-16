@@ -1,89 +1,50 @@
-# MarketFlow
+# Welcome to your Expo app 👋
 
-## Visão Geral
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-O **MarketFlow** é um aplicativo mobile-first desenvolvido para auxiliar usuários durante suas compras em supermercados, permitindo o acompanhamento dos gastos em tempo real e evitando surpresas no momento do pagamento.
+## Get started
 
-A proposta da aplicação é oferecer uma experiência simples, rápida e intuitiva, permitindo que o usuário registre produtos diretamente enquanto percorre os corredores do estabelecimento. A cada item adicionado, o sistema atualiza automaticamente o valor total da compra, proporcionando maior controle financeiro e transparência durante todo o processo.
+1. Install dependencies
 
-## Objetivo
+   ```bash
+   npm install
+   ```
 
-Permitir que o usuário acompanhe o valor total de suas compras em tempo real, registrando produtos, preços e quantidades diretamente pelo smartphone, facilitando o planejamento financeiro e a organização das compras.
+2. Start the app
 
-## Funcionalidades Principais
+   ```bash
+   npx expo start
+   ```
 
-### Captura de Produtos por Foto
+In the output, you'll find options to open the app in a
 
-O usuário pode registrar produtos utilizando a câmera do dispositivo móvel. As imagens são automaticamente otimizadas antes do armazenamento, garantindo melhor desempenho e economia de recursos.
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-### Cálculo Automático em Tempo Real
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-O sistema realiza a soma automática dos produtos cadastrados, exibindo continuamente:
+## Get a fresh project
 
-* Valor total da compra;
-* Quantidade total de itens cadastrados.
+When you're ready, run:
 
-Essas informações permanecem visíveis em um rodapé fixo durante toda a navegação.
+```bash
+npm run reset-project
+```
 
-### Gerenciamento de Itens
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-Os produtos adicionados podem ser editados a qualquer momento, permitindo alterações em:
+## Learn more
 
-* Nome do produto;
-* Imagem;
-* Preço;
-* Quantidade.
+To learn more about developing your project with Expo, look at the following resources:
 
-### Controle de Quantidade
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-A aplicação disponibiliza botões de incremento e decremento para facilitar o ajuste rápido da quantidade de unidades de cada produto.
+## Join the community
 
-### Autenticação e Segurança
+Join our community of developers creating universal apps.
 
-Cada usuário possui uma conta individual protegida por autenticação, garantindo que apenas o proprietário tenha acesso à sua lista de compras.
-
-### Experiência Mobile-First
-
-Toda a interface foi projetada prioritariamente para dispositivos móveis, permitindo utilização confortável com apenas uma mão durante as compras.
-
-## Design e Experiência do Usuário
-
-O MarketFlow adota uma identidade visual minimalista e moderna, inspirada em aplicações premium. Sua interface prioriza clareza e simplicidade, reduzindo distrações e mantendo o foco nas informações essenciais da compra.
-
-### Características Visuais
-
-* Fundo em tons off-white;
-* Títulos utilizando a fonte Instrument Serif;
-* Textos e elementos de interface utilizando a fonte Inter;
-* Espaçamento amplo entre componentes;
-* Navegação simplificada;
-* Ausência de elementos visuais desnecessários.
-
-Essa abordagem proporciona uma experiência elegante, organizada e intuitiva.
-
-## Tecnologias Utilizadas
-
-### Front-end
-
-* React
-* TanStack Start
-* Tailwind CSS
-
-### Back-end e Infraestrutura
-
-* node.js
-
-### Serviços Utilizados
-
-* Banco de dados
-* Sistema de autenticação
-* Armazenamento de imagens
-
-### Segurança
-
-* Row Level Security (RLS) para isolamento e proteção dos dados de cada usuário
-
-## Público-Alvo
-
-O sistema é destinado a consumidores que desejam acompanhar seus gastos durante compras em supermercados, mercados de bairro, atacadistas e estabelecimentos similares, proporcionando maior controle financeiro e previsibilidade dos custos.
-
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
