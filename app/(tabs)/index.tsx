@@ -68,7 +68,7 @@ export default function HomeScreen() {
       <ThemedView style={styles.stepContainer}>
         <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
         <ThemedText>
-          <Link href="/captura-produto">
+          <Link href="/capturaproduto">
             <ThemedText>Abrir tela de captura</ThemedText>
           </Link>
           {`When you're ready, run `}
