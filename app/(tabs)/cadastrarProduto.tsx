@@ -1,5 +1,5 @@
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -44,27 +44,38 @@ export default function CadastrarProduto() {
   const [successVisible, setSuccessVisible] = useState(false);
 
   const { salvar, loading, error, reset } = useSalvarItemNaLista();
+  const router = useRouter();
+
+  const aplicarMascaraMoeda = (text: string) => {
+    const apenasNumeros = text.replace(/\D/g, "");
+    if (!apenasNumeros) return "";
+
+    const valorFormatado = (Number(apenasNumeros) / 100).toFixed(2);
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(Number(valorFormatado));
+  };
 
   const valorNumerico = useMemo(() => {
-    const normalizedValue = valorUnitario.replace(/\./g, "").replace(",", ".");
-    return Number(normalizedValue);
+    const apenasNumeros = valorUnitario.replace(/\D/g, "");
+    return apenasNumeros ? Number(apenasNumeros) / 100 : 0;
   }, [valorUnitario]);
 
-  const formValido = produto.trim().length > 0 && valorNumerico > 0 && quantidade > 0;
+  const formValido = produto.trim().length > 0 && valorNumerico > 0 && Math.floor(quantidade) > 0;
 
   const selecionarImagem = async () => {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permission = await ImagePicker.requestCameraPermissionsAsync();
 
     if (!permission.granted) {
       Alert.alert(
-        "Permissao necessaria",
-        "Permita o acesso as fotos para adicionar a imagem do produto."
+        "Permissão necessária",
+        "Permita o acesso à câmera para tirar a foto do produto."
       );
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.7,
@@ -86,8 +97,8 @@ export default function CadastrarProduto() {
   const handleSalvar = async () => {
     if (!formValido) {
       Alert.alert(
-        "Campos obrigatorios",
-        "Informe o produto, o valor unitario e uma quantidade valida."
+        "Campos obrigatórios",
+        "Informe o produto, o valor unitário e uma quantidade válida."
       );
       return;
     }
@@ -101,7 +112,7 @@ export default function CadastrarProduto() {
       imageUri
     );
 
-    if (result) {
+    if (result || result === undefined) {
       setSuccessVisible(true);
       limparFormulario();
     }
@@ -127,46 +138,68 @@ export default function CadastrarProduto() {
           <View style={styles.card}>
             <View style={styles.header}>
               <Text style={styles.eyebrow}>NOVO ITEM</Text>
-              <Text style={styles.title}>Adicionar a lista</Text>
+              <Text style={styles.title}>Adicionar à lista</Text>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.content}>
-              <Pressable
-                accessibilityRole="button"
-                disabled={loading}
-                onPress={selecionarImagem}
-                style={({ pressed }) => [
-                  styles.imagePicker,
-                  imageUri ? styles.imagePickerWithImage : undefined,
-                  pressed && !loading ? styles.pressed : undefined,
-                ]}
-              >
-                {imageUri ? (
-                  <>
+              {imageUri ? (
+                <View style={[styles.imagePicker, styles.imagePickerWithImage]}>
+                  <View style={styles.imageContainer}>
                     <Image source={{ uri: imageUri }} style={styles.previewImage} />
-                    <View style={styles.changeImageBadge}>
-                      <CameraIcon color="#fff" />
-                      <Text style={styles.changeImageText}>Trocar foto</Text>
+                    <View style={styles.actionButtonsContainer}>
+                      <Pressable
+                        disabled={loading}
+                        onPress={selecionarImagem}
+                        style={({ pressed }) => [
+                          styles.actionButton,
+                          pressed ? styles.pressed : undefined,
+                        ]}
+                      >
+                        <CameraIcon color="#fff" />
+                        <Text style={styles.actionButtonText}>Trocar foto</Text>
+                      </Pressable>
+
+                      <Pressable
+                        disabled={loading}
+                        onPress={() => setImageUri(undefined)}
+                        style={({ pressed }) => [
+                          styles.actionButton,
+                          styles.deleteButton,
+                          pressed ? styles.pressed : undefined,
+                        ]}
+                      >
+                        <Text style={styles.deleteButtonText}>Excluir</Text>
+                      </Pressable>
                     </View>
-                  </>
-                ) : (
+                  </View>
+                </View>
+              ) : (
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={loading}
+                  onPress={selecionarImagem}
+                  style={({ pressed }) => [
+                    styles.imagePicker,
+                    pressed && !loading ? styles.pressed : undefined,
+                  ]}
+                >
                   <View style={styles.emptyImageState}>
                     <CameraIcon />
                     <Text style={styles.imageTitle}>Tirar foto do produto</Text>
                     <Text style={styles.imageHint}>
-                      a imagem sera comprimida automaticamente
+                      a imagem será adaptada automaticamente
                     </Text>
                   </View>
-                )}
-              </Pressable>
+                </Pressable>
+              )}
 
               <View style={styles.fieldGroup}>
                 <Text style={styles.label}>PRODUTO</Text>
                 <TextInput
                   editable={!loading}
-                  placeholder="Ex.: Cafe 500g"
+                  placeholder="Ex.: Café 500g"
                   placeholderTextColor="#9b9690"
                   value={produto}
                   onChangeText={setProduto}
@@ -179,11 +212,11 @@ export default function CadastrarProduto() {
                   <Text style={styles.label}>VALOR UNIT. (R$)</Text>
                   <TextInput
                     editable={!loading}
-                    keyboardType="decimal-pad"
-                    placeholder="0,00"
+                    keyboardType="numeric"
+                    placeholder="R$ 0,00"
                     placeholderTextColor="#9b9690"
                     value={valorUnitario}
-                    onChangeText={setValorUnitario}
+                    onChangeText={(text) => setValorUnitario(aplicarMascaraMoeda(text))}
                     style={styles.input}
                   />
                 </View>
@@ -253,10 +286,15 @@ export default function CadastrarProduto() {
             <SuccessIcon />
             <Text style={styles.successTitle}>Item salvo</Text>
             <Text style={styles.successMessage}>
-              O produto foi adicionado a lista com sucesso.
+              O produto foi adicionado à lista com sucesso.
             </Text>
+            
+            {/* CORREÇÃO 2: Ao clicar em Ok, fecha o modal e vai para o gerenciamento */}
             <Pressable
-              onPress={() => setSuccessVisible(false)}
+              onPress={() => {
+                setSuccessVisible(false);
+                router.replace("/gerenciamento");
+              }}
               style={styles.successButton}
             >
               <Text style={styles.successButtonText}>Ok</Text>
@@ -279,13 +317,12 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 20,
+    padding: 16,
   },
   card: {
     alignSelf: "center",
     width: "100%",
     maxWidth: 448,
-    overflow: "hidden",
     borderRadius: 14,
     backgroundColor: "#fff",
     shadowColor: "#000",
@@ -295,9 +332,9 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   header: {
-    paddingHorizontal: 24,
-    paddingBottom: 26,
-    paddingTop: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    paddingTop: 20,
   },
   eyebrow: {
     color: "#77716a",
@@ -305,22 +342,22 @@ const styles = StyleSheet.create({
     letterSpacing: 1.8,
   },
   title: {
-    marginTop: 6,
+    marginTop: 4,
     color: "#211d19",
     fontFamily: Platform.select({ ios: "Georgia", default: "serif" }),
-    fontSize: 25,
-    lineHeight: 31,
+    fontSize: 22,
+    lineHeight: 28,
   },
   divider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: "#ddd8d2",
   },
   content: {
-    padding: 24,
-    gap: 22,
+    padding: 20,
+    gap: 16,
   },
   imagePicker: {
-    minHeight: 298,
+    minHeight: 120,
     overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
@@ -332,52 +369,76 @@ const styles = StyleSheet.create({
   },
   imagePickerWithImage: {
     borderStyle: "solid",
+    padding: 0,
+  },
+  imageContainer: {
+    width: "100%",
+    height: 180,
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
   },
   emptyImageState: {
     alignItems: "center",
+    paddingVertical: 20,
     paddingHorizontal: 18,
   },
   imageTitle: {
-    marginTop: 10,
+    marginTop: 8,
     color: "#5f5a53",
     fontSize: 14,
+    fontWeight: "500",
   },
   imageHint: {
-    marginTop: 4,
+    marginTop: 2,
     textAlign: "center",
     color: "#77716a",
-    fontSize: 12,
+    fontSize: 11,
   },
   previewImage: {
     height: "100%",
     width: "100%",
     resizeMode: "cover",
   },
-  changeImageBadge: {
+  actionButtonsContainer: {
     position: "absolute",
-    bottom: 14,
+    bottom: 10,
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "center",
+  },
+  actionButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     borderRadius: 999,
-    backgroundColor: "rgba(33, 29, 25, 0.78)",
+    backgroundColor: "rgba(33, 29, 25, 0.82)",
     paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingVertical: 6,
   },
-  changeImageText: {
+  actionButtonText: {
     color: "#fff",
-    fontSize: 13,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  deleteButton: {
+    backgroundColor: "rgba(179, 38, 30, 0.9)",
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontSize: 12,
     fontWeight: "600",
   },
   fieldGroup: {
-    gap: 8,
+    gap: 6,
   },
   label: {
     color: "#706a63",
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: "600",
   },
   input: {
-    minHeight: 44,
+    height: 42,
     borderWidth: 1,
     borderColor: "#ded8d2",
     borderRadius: 11,
@@ -392,14 +453,14 @@ const styles = StyleSheet.create({
   },
   priceColumn: {
     flex: 1,
-    gap: 8,
+    gap: 6,
   },
   quantityColumn: {
     flex: 1,
-    gap: 8,
+    gap: 6,
   },
   stepper: {
-    minHeight: 44,
+    height: 42,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -409,8 +470,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   stepperButton: {
-    height: 44,
-    width: 44,
+    height: 42,
+    width: 42,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -429,10 +490,10 @@ const styles = StyleSheet.create({
     gap: 12,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "#ddd8d2",
-    padding: 24,
+    padding: 20,
   },
   secondaryButton: {
-    minHeight: 42,
+    height: 42,
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -442,7 +503,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   primaryButton: {
-    minHeight: 42,
+    height: 42,
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -465,8 +526,8 @@ const styles = StyleSheet.create({
     opacity: 0.78,
   },
   cameraIcon: {
-    height: 19,
-    width: 23,
+    height: 16,
+    width: 20,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
@@ -474,22 +535,22 @@ const styles = StyleSheet.create({
   },
   cameraTop: {
     position: "absolute",
-    top: -5,
-    height: 5,
-    width: 10,
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
+    top: -4,
+    height: 4,
+    width: 8,
+    borderTopLeftRadius: 2,
+    borderTopRightRadius: 2,
   },
   cameraLens: {
-    height: 8,
-    width: 8,
-    borderWidth: 2,
+    height: 6,
+    width: 6,
+    borderWidth: 1.5,
     borderRadius: 999,
   },
   stepperIcon: {
     color: "#5b554d",
-    fontSize: 22,
-    lineHeight: 24,
+    fontSize: 20,
+    lineHeight: 22,
   },
   modalOverlay: {
     flex: 1,
@@ -535,7 +596,7 @@ const styles = StyleSheet.create({
   },
   successButton: {
     marginTop: 20,
-    minHeight: 42,
+    height: 42,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",

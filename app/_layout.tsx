@@ -6,6 +6,7 @@ export default function RootLayout() {
       <Stack.Screen name="login" />
       <Stack.Screen name="cadastrarProduto" />
       <Stack.Screen name="(tabs)/index" />
+      <Stack.Screen name="(tabs)/gerenciamento" />
       <Stack.Screen name="(tabs)/explore" />
       <Stack.Screen name="modal" />
       <Stack.Screen name="cadastro" />

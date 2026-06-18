@@ -1,7 +1,7 @@
 import { addDoc, collection, Timestamp } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-import { db, storage } from "@/services/firebaseConfig";
+import { db, storage, auth } from "@/services/firebaseConfig";
 import type {
   ItemProduto,
   NovoItemProduto,
@@ -10,22 +10,23 @@ import type {
 
 const ITENS_LISTA_COLLECTION = "itens_lista";
 
+const comTimeout = <T>(promise: Promise<T>, tempoMs = 12000, mensagemErro = "Tempo expirado"): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(mensagemErro)), tempoMs)
+    ),
+  ]);
+};
+
 const getProdutoImageBlob = async (uri: string): Promise<Blob> => {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-
-    xhr.onload = () => {
-      resolve(xhr.response as Blob);
-    };
-
-    xhr.onerror = () => {
-      reject(new Error("Falha ao converter imagem local para upload."));
-    };
-
-    xhr.responseType = "blob";
-    xhr.open("GET", uri, true);
-    xhr.send();
-  });
+  try {
+    const response = await comTimeout(fetch(uri), 5000, "Falha ao ler o ficheiro da imagem local (Timeout).");
+    return await response.blob();
+  } catch (error) {
+    console.error("Erro ao converter imagem local para Blob:", error);
+    throw new Error(error instanceof Error ? error.message : "Falha ao converter imagem local.");
+  }
 };
 
 export const uploadProdutoImage = async (uri: string): Promise<string> => {
@@ -33,13 +34,18 @@ export const uploadProdutoImage = async (uri: string): Promise<string> => {
     const blob = await getProdutoImageBlob(uri);
     const imageRef = ref(storage, `produtos/${Date.now()}.jpg`);
 
-    await uploadBytes(imageRef, blob, {
-      contentType: "image/jpeg",
-    });
+    console.log("[Firebase Storage] A enviar imagem...");
+    await comTimeout(
+      uploadBytes(imageRef, blob, { contentType: "image/jpeg" }),
+      15000,
+      "O upload da imagem demorou muito tempo. Verifique a ligação ou o Firebase Storage."
+    );
 
-    return await getDownloadURL(imageRef);
-  } catch {
-    throw new Error("Falha ao fazer upload da imagem do produto.");
+    console.log("[Firebase Storage] A obter URL de download...");
+    return await comTimeout(getDownloadURL(imageRef), 5000, "Falha ao obter URL da imagem guardada.");
+  } catch (error) {
+    console.error("Erro detalhado no upload para o Firebase Storage:", error);
+    throw error;
   }
 };
 
@@ -54,34 +60,36 @@ export const salvarItemNaLista = async (
       imagemUrl = await uploadProdutoImage(imageUri);
     }
 
-    const itemParaSalvar: Omit<ItemProduto, "id"> = {
+    const userId = auth.currentUser?.uid;
+
+    const itemParaSalvar: Omit<ItemProduto, "id"> & { userId?: string } = {
       nome: item.nome.trim(),
       valorUnitario: item.valorUnitario,
       quantidade: item.quantidade,
+      userId,
       ...(imagemUrl ? { imagemUrl } : {}),
       criadoEm: Timestamp.now(),
     };
 
-    const docRef = await addDoc(
-      collection(db, ITENS_LISTA_COLLECTION),
-      itemParaSalvar
+    console.log("[Firestore] A tentar gravar o documento...");
+    
+    const docRef = await comTimeout(
+      addDoc(collection(db, ITENS_LISTA_COLLECTION), itemParaSalvar),
+      12000,
+      "O Firestore demorou muito tempo a responder. Ative o 'experimentalForceLongPolling' no seu firebaseConfig."
     );
+    
+    console.log("[Firestore] Gravado com sucesso! ID:", docRef.id);
 
     return {
       id: docRef.id,
       item: {
         ...itemParaSalvar,
         id: docRef.id,
-      },
+      } as ItemProduto,
     };
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === "Falha ao fazer upload da imagem do produto."
-    ) {
-      throw error;
-    }
-
-    throw new Error("Erro ao salvar o item na lista. Verifique sua conexão.");
+    console.error("Erro capturado no serviço:", error);
+    throw error; 
   }
 };

@@ -27,7 +27,8 @@ export default function LoginScreen() {
 
     try {
       await signInWithEmailAndPassword(auth, email, senha);
-      router.replace("/(tabs)" as any);
+
+      router.replace("/(tabs)/gerenciamento" as any);
     } catch (error) {
       Alert.alert("Erro no login", "E-mail ou senha inválidos.");
     }
@@ -37,7 +38,7 @@ export default function LoginScreen() {
     <View style={[styles.container, isMobile && styles.mobileContainer]}>
       {!isMobile && (
         <View style={styles.leftSide}>
-          <Text style={styles.topText}>MARKTEFLOW</Text>
+          <Text style={styles.topText}>MARKETFLOW</Text>
 
           <View>
             <Text style={styles.heroTitle}>Compre com{"\n"}consciência.</Text>
@@ -52,7 +53,7 @@ export default function LoginScreen() {
       )}
 
       <View style={[styles.rightSide, isMobile && styles.mobileRightSide]}>
-        {isMobile && <Text style={styles.mobileTopText}>MARKTEFLOW</Text>}
+        {isMobile && <Text style={styles.mobileTopText}>MARKETFLOW</Text>}
 
         <View style={styles.form}>
           <Text style={styles.title}>Entrar</Text>
@@ -79,17 +80,13 @@ export default function LoginScreen() {
             secureTextEntry
           />
 
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Entrar</Text>
+          </TouchableOpacity>
 
-
-<TouchableOpacity style={styles.button} onPress={handleLogin}>
-  <Text style={styles.buttonText}>Entrar</Text>
-</TouchableOpacity>
-
-<TouchableOpacity onPress={() => router.push("/cadastro" as any)}>
-  <Text style={styles.createAccount}>
-    Não tem conta? Criar conta
-  </Text>
-</TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/cadastro" as any)}>
+            <Text style={styles.createAccount}>Não tem conta? Criar conta</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
