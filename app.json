@@ -38,6 +38,13 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O aplicativo precisa de acesso às suas fotos para você escolher a imagem do produto.",
+          "cameraPermission": "O aplicativo precisa de acesso à câmera para você tirar foto do produto."
+        }
       ]
     ],
     "experiments": {

@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Image,
   Pressable,
@@ -10,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { useRouter } from "expo-router"; 
 import { auth } from "@/services/firebaseConfig";
 import {
   atualizarQuantidade,
@@ -22,6 +22,7 @@ export default function GerenciamentoScreen() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [carregando, setCarregando] = useState(true);
   const user = auth.currentUser;
+  const router = useRouter(); 
 
   useEffect(() => {
     if (!user) {
@@ -38,7 +39,7 @@ export default function GerenciamentoScreen() {
   }, [user]);
 
   function handleAdicionar() {
-    Alert.alert("Adicionar produto", "A tela de cadastro de produto ainda precisa ser integrada pelo grupo.");
+    router.push("/cadastrarProduto"); 
   }
 
   const totalGeral = useMemo(() => {
@@ -64,7 +65,21 @@ export default function GerenciamentoScreen() {
           contentContainerStyle={produtos.length ? styles.list : styles.emptyList}
           data={produtos}
           keyExtractor={(item) => item.id}
-          ListEmptyComponent={null}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <View style={styles.iconCircle}>
+                <Ionicons name="camera-outline" size={24} color="#111" />
+              </View>
+              <Text style={styles.emptyTitle}>Sua lista está vazia</Text>
+              <Text style={styles.emptySubtitle}>
+                Comece fotografando um produto da prateleira e adicione preço e quantidade.
+              </Text>
+              <Pressable onPress={handleAdicionar} style={styles.emptyAddButton}>
+                <Ionicons name="camera-outline" size={16} color="#fff" />
+                <Text style={styles.emptyAddButtonText}>Adicionar primeiro item</Text>
+              </Pressable>
+            </View>
+          }
           renderItem={({ item }) => (
             <View style={styles.item}>
               {item.imagemUrl ? (
@@ -160,7 +175,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fbfaf7",
   },
   header: {
-    paddingTop: 18,
+    paddingTop: 40, 
     paddingHorizontal: 24,
     paddingBottom: 14,
     borderBottomWidth: 1,
@@ -175,6 +190,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: "#111",
     marginTop: 2,
+    fontWeight: "600",
   },
   center: {
     flex: 1,
@@ -187,8 +203,52 @@ const styles = StyleSheet.create({
   },
   emptyList: {
     flexGrow: 1,
-    paddingHorizontal: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 40,
     paddingBottom: 110,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#f0ede7",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    color: "#111",
+    fontWeight: "500",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: "#777",
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  emptyAddButton: {
+    height: 42,
+    borderRadius: 21,
+    paddingHorizontal: 24,
+    backgroundColor: "#111",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  emptyAddButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
   },
   item: {
     flexDirection: "row",
@@ -307,4 +367,3 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
-

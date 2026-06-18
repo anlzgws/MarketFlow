@@ -19,11 +19,13 @@ export type Produto = {
   total?: number;
 };
 
+const COLECAO_FIREBASE = "itens_lista";
+
 export function observarProdutos(
   userId: string,
   callback: (produtos: Produto[]) => void
 ) {
-  const produtosRef = collection(db, "produtos");
+  const produtosRef = collection(db, COLECAO_FIREBASE);
   const consulta = query(produtosRef, where("userId", "==", userId));
 
   return onSnapshot(consulta, (snapshot) => {
@@ -40,12 +42,12 @@ export async function atualizarQuantidade(produto: Produto, quantidade: number) 
   const novaQuantidade = Math.max(1, quantidade);
   const total = produto.valorUnitario * novaQuantidade;
 
-  return updateDoc(doc(db, "produtos", produto.id), {
+  return updateDoc(doc(db, COLECAO_FIREBASE, produto.id), {
     quantidade: novaQuantidade,
     total,
   });
 }
 
 export async function removerProduto(produtoId: string) {
-  return deleteDoc(doc(db, "produtos", produtoId));
+  return deleteDoc(doc(db, COLECAO_FIREBASE, produtoId));
 }
