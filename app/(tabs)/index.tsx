@@ -1,13 +1,14 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { router } from "expo-router";
+import { signOut } from "firebase/auth";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { auth } from "@/services/firebaseConfig";
 
 export default function HomeScreen() {
+  async function sair() {
+    await signOut(auth);
+    router.replace("/login");
+  }
+
   return (
 
     <ParallaxScrollView
@@ -83,20 +84,32 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    padding: 24,
+    justifyContent: "center",
+    backgroundColor: "#F5F7FA",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 30,
+    fontWeight: "bold",
+    textAlign: "center",
+    color: "#2563EB",
+    marginBottom: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  text: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  button: {
+    backgroundColor: "#DC2626",
+    padding: 16,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
   },
 });
