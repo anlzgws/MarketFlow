@@ -7,6 +7,7 @@ export default function RootLayout() {
       <Stack.Screen name="(tabs)/index" />
       <Stack.Screen name="(tabs)/explore" />
       <Stack.Screen name="modal" />
+      <Stack.Screen name="cadastro" />
     </Stack>
   );
 }
