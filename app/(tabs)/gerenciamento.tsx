@@ -1,4 +1,6 @@
 ﻿import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { signOut } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -9,7 +11,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { useRouter } from "expo-router"; 
+
 import { auth } from "@/services/firebaseConfig";
 import {
   atualizarQuantidade,
@@ -22,11 +24,17 @@ export default function GerenciamentoScreen() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [carregando, setCarregando] = useState(true);
   const user = auth.currentUser;
-  const router = useRouter(); 
+  const router = useRouter();
+
+  async function sair() {
+    await signOut(auth);
+    router.replace("/login");
+  }
 
   useEffect(() => {
     if (!user) {
       setCarregando(false);
+      router.replace("/login");
       return;
     }
 
@@ -36,10 +44,10 @@ export default function GerenciamentoScreen() {
     });
 
     return unsubscribe;
-  }, [user]);
+  }, [user, router]);
 
   function handleAdicionar() {
-    router.push("/cadastrarProduto"); 
+    router.push("/(tabs)/cadastrarProduto" as any);
   }
 
   const totalGeral = useMemo(() => {
@@ -52,8 +60,14 @@ export default function GerenciamentoScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.label}>LISTA INTELIGENTE</Text>
-        <Text style={styles.title}>Sua compra</Text>
+        <View>
+          <Text style={styles.label}>LISTA INTELIGENTE</Text>
+          <Text style={styles.title}>Sua compra</Text>
+        </View>
+
+        <Pressable onPress={sair} style={styles.logoutButton}>
+          <Ionicons name="log-out-outline" size={24} color="#111" />
+        </Pressable>
       </View>
 
       {carregando ? (
@@ -175,11 +189,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#fbfaf7",
   },
   header: {
-    paddingTop: 40, 
+    paddingTop: 40,
     paddingHorizontal: 24,
     paddingBottom: 14,
     borderBottomWidth: 1,
     borderBottomColor: "#ddd8cf",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  logoutButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
   },
   label: {
     fontSize: 10,
