@@ -56,9 +56,9 @@ export const salvarItemNaLista = async (
   try {
     let imagemUrl = item.imagemUrl;
 
-    if (imageUri) {
-      imagemUrl = await uploadProdutoImage(imageUri);
-    }
+if (imageUri) {
+  imagemUrl = imageUri;
+}
 
     const userId = auth.currentUser?.uid;
 
@@ -73,12 +73,10 @@ export const salvarItemNaLista = async (
 
     console.log("[Firestore] A tentar gravar o documento...");
     
-    const docRef = await comTimeout(
-      addDoc(collection(db, ITENS_LISTA_COLLECTION), itemParaSalvar),
-      12000,
-      "O Firestore demorou muito tempo a responder. Ative o 'experimentalForceLongPolling' no seu firebaseConfig."
-    );
-    
+    const docRef = await addDoc(
+  collection(db, ITENS_LISTA_COLLECTION),
+  itemParaSalvar
+);
     console.log("[Firestore] Gravado com sucesso! ID:", docRef.id);
 
     return {

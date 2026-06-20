@@ -28,7 +28,7 @@ export default function CadastroScreen() {
 
     try {
       await createUserWithEmailAndPassword(auth, email, senha);
-      router.replace("/(tabs)" as any);
+      router.replace("/login" as any);
     } catch (error) {
       Alert.alert("Erro no cadastro", "Não foi possível criar a conta.");
     }

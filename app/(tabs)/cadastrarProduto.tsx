@@ -293,7 +293,7 @@ export default function CadastrarProduto() {
             <Pressable
               onPress={() => {
                 setSuccessVisible(false);
-                router.replace("/gerenciamento");
+                router.replace("/(tabs)/gerenciamento" as any);
               }}
               style={styles.successButton}
             >
